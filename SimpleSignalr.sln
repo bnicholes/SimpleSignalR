@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleSignalrServer", "SimpleSignalrServer\SimpleSignalrServer.csproj", "{02B87BF3-8348-4DA3-863D-02995BC84175}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleSignalrClient", "SimpleSignalrClient\SimpleSignalrClient.csproj", "{E76EE626-10B8-4315-ACD4-F1C45748B263}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02B87BF3-8348-4DA3-863D-02995BC84175}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02B87BF3-8348-4DA3-863D-02995BC84175}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02B87BF3-8348-4DA3-863D-02995BC84175}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02B87BF3-8348-4DA3-863D-02995BC84175}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E76EE626-10B8-4315-ACD4-F1C45748B263}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E76EE626-10B8-4315-ACD4-F1C45748B263}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E76EE626-10B8-4315-ACD4-F1C45748B263}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E76EE626-10B8-4315-ACD4-F1C45748B263}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {669B3B8D-0C2C-4ECF-A21C-1791615E77C2}
+	EndGlobalSection
+EndGlobal
