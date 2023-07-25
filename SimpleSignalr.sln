@@ -5,7 +5,7 @@ VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleSignalrServer", "SimpleSignalrServer\SimpleSignalrServer.csproj", "{02B87BF3-8348-4DA3-863D-02995BC84175}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleSignalrClient", "SimpleSignalrClient\SimpleSignalrClient.csproj", "{E76EE626-10B8-4315-ACD4-F1C45748B263}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleSignalrClient", "SimpleSignalrClient\SimpleSignalrClient.csproj", "{E76EE626-10B8-4315-ACD4-F1C45748B263}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

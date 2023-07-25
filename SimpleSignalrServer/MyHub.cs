@@ -8,5 +8,17 @@ namespace SimpleSignalrServer
         {
             await Clients.All.SendAsync("ReceiveMessage", user, message);
         }
+
+        public override async Task OnConnectedAsync()
+        {
+            Console.WriteLine($"ConnectionId {Context.ConnectionId} connected");
+            await base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            Console.WriteLine($"ConnectionId {Context.ConnectionId} disconnected");
+            return base.OnDisconnectedAsync(exception);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net.Security;
+﻿using System.Linq.Expressions;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -7,18 +8,22 @@ namespace SimpleSignalrClient
     public class Program
     {
         private static HubConnection _connection;
-        private static bool ignoreSsl = false; //Set to true to use a default validation callback
+        private static bool ignoreSsl = true; //Set to true to use a default validation callback
         private static readonly RemoteCertificateValidationCallback _validationCallback = CertificateValidationCallback; //Set to null to use no callback
-        private static string certPath = @"<your-pfx-cert-path-here";
-        private static string certPassword = "<your-pfx-cert-passphrase-here";
+        private static string certPath = @"<your-ssl-certificate.pfx";
+        private static string certPassword = "<ssl-certificate-password>";
+        private static string url = "https://localhost:8443/myHub";
+        //private static string url = "https://<spp-host>/service/a2a/signalr";
+        private static string apiKey = "<A2A-Apikey>";
 
         public static async Task Main(string[] args)
         {
             var x509 = new X509Certificate2(File.ReadAllBytes(certPath), certPassword);
 
             _connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:8443/myHub", options =>
+                .WithUrl(url, options =>
                 {
+                    options.Headers.Add("Authorization", $"A2A {apiKey}");
                     options.ClientCertificates.Add(x509);
 
                     options.HttpMessageHandlerFactory = (message) =>
@@ -50,6 +55,7 @@ namespace SimpleSignalrClient
 
             _connection.Closed += async (error) =>
             {
+                Console.WriteLine($"Got Error: {error}");
                 await Task.Delay(new Random().Next(0, 5) * 1000);
                 await _connection.StartAsync();
             };
