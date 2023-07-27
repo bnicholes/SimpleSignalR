@@ -3,10 +3,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace SimpleSignalrServer
 {
@@ -24,24 +26,25 @@ namespace SimpleSignalrServer
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseKestrel(options =>
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.ConfigureKestrel(options =>
                     {
-                        options.Listen(IPAddress.Any, 8443, listenOptions => // https
-                        {
-                            listenOptions.UseHttps(certPath, certPassword);
-                        });
                         options.ConfigureHttpsDefaults(configOptions =>
                         {
                             configOptions.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-                            configOptions.CheckCertificateRevocation = false;
                             configOptions.ClientCertificateValidation = (certificate2, validationChain, policyErrors) =>
                             {
                                 return true;
                             };
                         });
 
+                        // Configuring the listen port and certificate has to be done after configuring the https defaults.
+                        options.Listen(IPAddress.Any, 8443, listenOptions => // https
+                        {
+                            listenOptions.UseHttps(certPath, certPassword);
+                            listenOptions.UseConnectionLogging();
+                        });
                     });
-                    webBuilder.UseStartup<Startup>();
                 });
     }
 
@@ -57,15 +60,29 @@ namespace SimpleSignalrServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalR(o => o.HandshakeTimeout = TimeSpan.FromSeconds(30));
+            services.AddSignalR(o =>
+            {
+                o.HandshakeTimeout = TimeSpan.FromSeconds(30);
+                o.EnableDetailedErrors = true;
+            });
             services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate(options =>
             {
                 options.AllowedCertificateTypes = CertificateTypes.All;
                 options.Events = new CertificateAuthenticationEvents
                 {
+                    OnAuthenticationFailed = context =>
+                    {
+                        var logger = context.HttpContext.RequestServices.GetService<ILogger<Startup>>();
+
+                        logger.LogError(context.Exception, "Failed auth.");
+
+                        return Task.CompletedTask;
+                    },
                     OnCertificateValidated = context =>
                     {
-                        var cert = context.ClientCertificate;
+                        var logger = context.HttpContext.RequestServices.GetService<ILogger<Startup>>();
+                        logger.LogInformation("Within the OnCertificateValidated portion of Startup");
+
                         var claims = new[]
                         {
                             new Claim(
@@ -77,7 +94,7 @@ namespace SimpleSignalrServer
                                 context.ClientCertificate.Subject,
                                 ClaimValueTypes.String, context.Options.ClaimsIssuer)
                         };
-
+                        
                         context.Principal = new ClaimsPrincipal(
                             new ClaimsIdentity(claims, context.Scheme.Name));
                         context.Success();
@@ -103,19 +120,11 @@ namespace SimpleSignalrServer
             }
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            // app.UseStaticFiles();
 
-            app.Use((context, next) => 
+            app.Use(async (context, next) =>
             {
-                Console.WriteLine("Called the authentication handlers.");
-                var cert = Task.Run(async () => await context.Connection.GetClientCertificateAsync()).Result;
-
-
-                if (cert != null)
-                {
-                    Console.WriteLine("Got a certificate {cert}");
-                }
-                return next(context);
+                await AuthenticateAsync(context, next);
             });
 
             app.UseRouting();
@@ -127,6 +136,21 @@ namespace SimpleSignalrServer
             {
                 endpoints.MapHub<MyHub>("/myHub");
             });
+        }
+
+        private async Task AuthenticateAsync(HttpContext context, Func<Task> next)
+        {
+            var logger = context.RequestServices.GetService<ILogger<Startup>>();
+            logger.LogInformation("Called the authentication handlers.");
+
+            var cert = await context.Connection.GetClientCertificateAsync();
+            if (cert != null)
+            {
+                logger.LogInformation($"Got the client certificate {cert}");
+            }
+
+            // Call the inner handler
+            await next();
         }
     }
 }

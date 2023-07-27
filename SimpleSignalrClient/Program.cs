@@ -18,7 +18,7 @@ namespace SimpleSignalrClient
 
         public static async Task Main(string[] args)
         {
-            var x509 = new X509Certificate2(File.ReadAllBytes(certPath), certPassword);
+            var x509 = new X509Certificate2(File.ReadAllBytes(certPath), certPassword, X509KeyStorageFlags.UserKeySet);
 
             _connection = new HubConnectionBuilder()
                 .WithUrl(url, options =>
@@ -34,6 +34,7 @@ namespace SimpleSignalrClient
                             {
                                 clientHandler.ServerCertificateCustomValidationCallback =
                                     (sender, certificate, chain, sslPolicyErrors) => true;
+                                clientHandler.ClientCertificateOptions = ClientCertificateOption.Manual;
                             }
                             else
                             {
